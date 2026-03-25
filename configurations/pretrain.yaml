@@ -1,0 +1,78 @@
+exp_name: "usat_pretrain_example"
+version: 0
+random_seed: 42
+mixed_precision: true
+
+w&b_entity: "[YOUR_WANDB_ENTITY]"
+w&b_project: "[YOUR_WANDB_PROJECT]"
+
+task: "USatMAE"
+
+dataset:
+  name: "BigEarthNetDatasetUSat"
+  train_args:
+    base_path: "[PATH_TO_BIGEARTHNET]"
+    split: "train"
+    sentinel_source: "all"
+    standardize: true
+    ground_cover: 640
+    data_percent: 0.1
+    satmae_transform: false
+
+pretrain_transform:
+  transform1:
+    # Dummy transform placeholder
+    # Actual implementation may require specific arguments
+    # To use random applying transforms
+
+models:
+  mae:
+    type: "USatMAE"
+    args:
+      img_size: 224
+      patch_size: 16
+      in_chans: 14
+      embed_dim: 768
+      depth: 12
+      num_heads: 12
+      decoder_embed_dim: 512
+      decoder_depth: 8
+      decoder_num_heads: 16
+      mlp_ratio: 4.0
+      norm_layer: "LayerNorm"
+      # Specify input params per sensor
+      input_params:
+        S1:
+          num_patch: 14
+          GSD: 10
+        S2:
+          num_patch: 14
+          GSD: 10
+
+training:
+  trainer:
+    gpus: 1
+    strategy: null
+    max_epochs: 100
+    accumulated_batches: 1
+    gradient_clip_val: 0
+    save_dir: "results/pretrain"
+    save_top_k: 5
+    monitor_metric: "Train/R0_loss"
+    monitor_mode: "min"
+    patience: 10
+    enable_model_summary: true
+
+  batch_size: 64
+  warmup_epoch: 5
+
+  optimizer_cfg:
+    lr: 0.001
+    weight_decay: 0.05
+
+  optimizer: "AdamW"
+
+  mae:
+    mask_ratio: 0.75
+    spectral_mask_ratio: 0.75
+    log_img_per_steps: 100
