@@ -177,7 +177,7 @@ class BigEarthNetDataset(BigEarthNet):
         if bands:
             assert all(band in BEN_BANDS for band in bands)
             exclude_bands =  list(set(BEN_BANDS) - set(bands))
-            self.exclude_re = re.compile(f".*({'|'.join(exclude_bands)})\.tif$")
+            self.exclude_re = re.compile(rf".*({'|'.join(exclude_bands)})\.tif$")
             stat_idxs = [ind for ind, val in enumerate(BEN_BANDS)
                                 if val in bands] 
 
@@ -625,7 +625,7 @@ class BigEarthNetDatasetUSat(BigEarthNet):
         self.splits_to_use = splits_to_use
         self.splits_metadata = self.splits_metadata[splits_to_use]
         self.image_size = image_size
-        self.band_regex = re.compile(".*_(.*)\.tif")
+        self.band_regex = re.compile(r".*_(.*)\.tif")
         self.ben_bands = BEN_BANDS
         self.ground_cover = ground_cover
         self.data_percent = data_percent
@@ -634,7 +634,7 @@ class BigEarthNetDatasetUSat(BigEarthNet):
         if bands:
             assert all(band in BEN_BANDS for band in bands)
             exclude_bands =  list(set(BEN_BANDS) - set(bands))
-            self.exclude_re = re.compile(f".*({'|'.join(exclude_bands)})\.tif$")
+            self.exclude_re = re.compile(rf".*({'|'.join(exclude_bands)})\.tif$")
             #self.stat_idxs = [ind for ind, val in enumerate(BEN_BANDS)
             #                    if val in bands] 
 

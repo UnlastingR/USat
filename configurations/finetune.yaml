@@ -1,0 +1,71 @@
+exp_name: "usat_finetune_example"
+version: 0
+random_seed: 42
+mixed_precision: true
+
+w&b_entity: "[YOUR_WANDB_ENTITY]"
+w&b_project: "[YOUR_WANDB_PROJECT]"
+
+task: "ImageClassificationTask"
+
+dataset:
+  name: "BigEarthNetDatasetUSat"
+  train_args:
+    base_path: "[PATH_TO_BIGEARTHNET]"
+    split: "train"
+    sentinel_source: "all"
+    standardize: true
+    ground_cover: 640
+    data_percent: 1.0
+  eval_args:
+    base_path: "[PATH_TO_BIGEARTHNET]"
+    split: "val"
+    sentinel_source: "all"
+    standardize: true
+    ground_cover: 640
+    data_percent: 1.0
+
+models:
+  encoder:
+    type: "USatViT"
+    ckpt: "[PATH_TO_PRETRAINED_CHECKPOINT]"
+    ckpt_ignore:
+      - "decoder.*"
+      - "mask_token"
+    args:
+      img_size: 224
+      patch_size: 16
+      in_chans: 14
+      embed_dim: 768
+      depth: 12
+      num_heads: 12
+      mlp_ratio: 4.0
+      norm_layer: "LayerNorm"
+  head:
+    type: "LinearHead"
+    args:
+      in_dim: 768
+      num_classes: 43
+
+training:
+  trainer:
+    gpus: 1
+    strategy: null
+    max_epochs: 50
+    accumulated_batches: 1
+    gradient_clip_val: 0
+    save_dir: "results/finetune"
+    save_top_k: 3
+    monitor_metric: "Eval/loss"
+    monitor_mode: "min"
+    patience: 10
+    enable_model_summary: true
+
+  batch_size: 128
+  warmup_epoch: 5
+
+  optimizer_cfg:
+    lr: 0.0001
+    weight_decay: 0.05
+
+  optimizer: "AdamW"
